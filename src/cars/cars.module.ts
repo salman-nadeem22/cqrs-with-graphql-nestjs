@@ -1,8 +1,19 @@
 import { Module } from '@nestjs/common';
 import { CarsResolver } from './cars.resolver';
-import { CarsService } from './cars.service';
+import { CarRepository } from './repository/cars.repository';
+import { CommandHandlers } from './commands/handlers';
+import { EventHandlers } from './events/handlers';
+import { QueryHandlers } from './queries/handlers';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
-  providers: [CarsService, CarsResolver],
+  imports: [CqrsModule],
+  providers: [
+    CarRepository,
+    CarsResolver,
+    ...CommandHandlers,
+    ...EventHandlers,
+    ...QueryHandlers,
+  ],
 })
 export class CarsModule {}

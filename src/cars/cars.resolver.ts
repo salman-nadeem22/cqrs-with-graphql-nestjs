@@ -1,21 +1,27 @@
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { CarSchema } from './car.schema';
-import { CarsService } from './cars.service';
+import { CreateNewCarCommand } from './commands/impl';
+import { GetAllCarsQuery } from './queries/impl';
 
 @Resolver(() => CarSchema)
 export class CarsResolver {
-  constructor(private carsService: CarsService) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Query(() => [CarSchema])
-  getCars(): CarSchema[] {
-    return this.carsService.getAllCars();
+  async getCars(): Promise<CarSchema[]> {
+    return this.queryBus.execute(new GetAllCarsQuery());
   }
 
-  @Mutation(() => CarSchema)
-  createNewCar(
+  @Mutation(() => [CarSchema], { nullable: true })
+  async createNewCar(
     @Args('name') name: string,
     @Args('carNumber') carNumber: number,
-  ): CarSchema {
-    return this.carsService.createNewCar({ name, carNumber });
+  ) {
+    this.commandBus.execute(new CreateNewCarCommand(name, carNumber));
+    return this.queryBus.execute(new GetAllCarsQuery());
   }
 }

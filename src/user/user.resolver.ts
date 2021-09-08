@@ -12,7 +12,7 @@ export class UserResolver {
   }
 
   @Mutation(() => UserSchema)
-  createNewCar(
+  createNewUser(
     @Args('name') name: string,
     @Args('email') email: string,
     @Args('password') password: string,
